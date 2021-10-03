@@ -17,12 +17,18 @@
     "vite": "2.5.0"
   },
   "dependencies": {
+    "axios": "^0.22.0",
     "emmet-monaco-es": "^4.7.1",
     "escape-html": "1.0.3",
     "hotkeys-js": "3.8.7",
     "js-base64": "3.6.1",
-    "monaco-editor": "0.27.0",
+    "monaco-editor": "^0.27.0",
+    "monaco-editor-textmate": "^3.0.0",
+    "monaco-textmate": "^3.0.1",
+    "monaco-vscode-textmate-theme-converter": "^0.1.7",
+    "onigasm": "^2.2.5",
     "split-grid": "1.0.11",
+    "tslib": "^2.3.1",
     "zustand": "3.5.10"
   },
   "eslintConfig": {

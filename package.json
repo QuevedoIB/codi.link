@@ -2,6 +2,7 @@
   "name": "codi.link",
   "version": "0.0.0",
   "private": true,
+  "main": "main.js",
   "scripts": {
     "co": "sui-mono commit",
     "lint": "standard",
@@ -11,18 +12,24 @@
     "postinstall": "git config core.hooksPath ./git-hooks"
   },
   "devDependencies": {
+    "@rollup/plugin-inject": "^4.0.2",
     "@s-ui/mono": "2",
     "postcss-nesting": "^8.0.1",
+    "rollup-plugin-polyfill-node": "^0.7.0",
     "standard": "16.0.3",
     "vite": "2.5.0"
   },
   "dependencies": {
+    "@babel/parser": "^7.15.7",
+    "@babel/traverse": "^7.15.4",
     "axios": "^0.22.0",
+    "buffer": "^6.0.3",
     "emmet-monaco-es": "^4.7.1",
     "escape-html": "1.0.3",
     "hotkeys-js": "3.8.7",
     "js-base64": "3.6.1",
     "monaco-editor": "0.27.0",
+    "monaco-jsx-highlighter": "^1.1.8",
     "split-grid": "1.0.11",
     "zustand": "3.5.10"
   },

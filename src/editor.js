@@ -4,7 +4,10 @@ import HtmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
 import CssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker'
 import JsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
 import { getState } from './state.js'
-import getReactTypes from './monaco/reactTypes.js'
+import { getReactTypes } from './services/reactService'
+import { parse } from '@babel/parser'
+import traverse from '@babel/traverse'
+import MonacoJSXHighlighter from 'monaco-jsx-highlighter';
 
 (async () => {
   monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
@@ -26,8 +29,6 @@ import getReactTypes from './monaco/reactTypes.js'
   })
 
   const types = await getReactTypes()
-
-  console.log('LOAD TYPES', types)
 
   monaco.languages.typescript.typescriptDefaults.addExtraLib(
     types,
@@ -76,9 +77,29 @@ window.MonacoEnvironment = {
 }
 
 export const createEditor = ({ domElement, language, value }) => {
-  return monaco.editor.create(domElement, {
+  const editor = monaco.editor.create(domElement, {
     value,
     language: language === 'javascript' ? 'typescript' : language,
     ...COMMON_EDITOR_OPTIONS
   })
+
+  if (language === 'javascript') {
+    // Minimal Babel setup for React JSX parsing:
+    const babelParse = code => parse(code, {
+      sourceType: 'module',
+      plugins: ['jsx']
+    })
+
+    // Instantiate the highlighter
+    const monacoJSXHighlighter = new MonacoJSXHighlighter(
+      monaco, babelParse, traverse, editor
+    )
+    // Activate highlighting (debounceTime default: 100ms)
+    monacoJSXHighlighter.highLightOnDidChangeModelContent(100)
+    // Activate JSX commenting
+    monacoJSXHighlighter.addJSXCommentCommand()
+    // Done =)
+  }
+
+  return editor
 }

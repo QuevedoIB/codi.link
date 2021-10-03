@@ -17,6 +17,7 @@
     "vite": "2.5.0"
   },
   "dependencies": {
+    "axios": "^0.22.0",
     "emmet-monaco-es": "^4.7.1",
     "escape-html": "1.0.3",
     "hotkeys-js": "3.8.7",

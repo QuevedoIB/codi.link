@@ -61,7 +61,6 @@ const js = rawJs ? decode(rawJs) : '';
   const MS_UPDATE_DEBOUNCED_TIME = 200
   const debouncedUpdate = debounce(update, MS_UPDATE_DEBOUNCED_TIME)
 
-  console.log('models', htmlEditor, cssEditor, jsEditor)
   htmlEditor.focus()
   htmlEditor.onDidChangeModelContent(debouncedUpdate)
   cssEditor.onDidChangeModelContent(debouncedUpdate)

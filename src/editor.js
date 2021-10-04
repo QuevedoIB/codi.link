@@ -3,14 +3,12 @@ import { emmetHTML } from 'emmet-monaco-es'
 import HtmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
 import CssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker'
 import JsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
-import { getState } from './state.js'
-import { $ } from './utils/dom'
-
 import { loadWASM } from 'onigasm'
 import { Registry } from 'monaco-textmate'
 import { wireTmGrammars } from 'monaco-editor-textmate'
 
-import * as themes from './public/assets/themes'
+import { getState } from './state.js'
+import configureThemes from './utils/configureThemes.js'
 
 monaco.languages.register({ id: 'javascript' })
 monaco.languages.register({ id: 'typescript' })
@@ -81,18 +79,11 @@ export async function createEditors (configs) {
   grammars.set('typescript', 'source.ts')
   grammars.set('javascript', 'source.js')
 
-  Object.entries(themes).forEach(([name, config]) => {
-    console.log(window.convertTheme(config))
-    monaco.editor.defineTheme(name, { ...window.convertTheme(config), inherit: true })
-    const themeSelect = $('.select select[data-for="theme"]')
-    const option = document.createElement('option')
-    option.text = name
-    option.value = name
-    themeSelect.appendChild(option)
-  })
+  configureThemes()
+
   const editors = {}
+
   await Promise.all(configs.map(async ({ language, value, domElement }) => {
-    console.log(COMMON_EDITOR_OPTIONS)
     const editor = monaco.editor.create(domElement, {
       value,
       language,

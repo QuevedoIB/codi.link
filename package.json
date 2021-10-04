@@ -11,6 +11,7 @@
     "postinstall": "git config core.hooksPath ./git-hooks"
   },
   "devDependencies": {
+    "@babel/plugin-syntax-dynamic-import": "^7.8.3",
     "@s-ui/mono": "2",
     "postcss-nesting": "^8.0.1",
     "standard": "16.0.3",
@@ -23,12 +24,13 @@
     "hotkeys-js": "3.8.7",
     "js-base64": "3.6.1",
     "monaco-editor": "^0.27.0",
+    "monaco-editor-core": "^0.28.1",
     "monaco-editor-textmate": "^3.0.0",
     "monaco-textmate": "^3.0.1",
-    "monaco-vscode-textmate-theme-converter": "^0.1.7",
     "onigasm": "^2.2.5",
     "split-grid": "1.0.11",
     "tslib": "^2.3.1",
+    "vite-plugin-cdn": "^1.0.0-beta.3",
     "zustand": "3.5.10"
   },
   "eslintConfig": {

@@ -1,4 +1,4 @@
-import * as monaco from 'monaco-editor'
+import * as monaco from 'monaco-editor-core'
 import { emmetHTML } from 'emmet-monaco-es'
 import HtmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
 import CssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker'
@@ -6,11 +6,16 @@ import JsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
 import { getState } from './state.js'
 import { $ } from './utils/dom'
 
+import { loadWASM } from 'onigasm'
+import { Registry } from 'monaco-textmate'
+import { wireTmGrammars } from 'monaco-editor-textmate'
+
 import * as themes from './public/assets/themes'
 
-import { loadWASM } from 'onigasm' // peer dependency of 'monaco-textmate'
-import { Registry } from 'monaco-textmate' // peer dependency
-import { wireTmGrammars } from 'monaco-editor-textmate'
+monaco.languages.register({ id: 'javascript' })
+monaco.languages.register({ id: 'typescript' })
+monaco.languages.register({ id: 'css' })
+monaco.languages.register({ id: 'html' })
 
 const {
   fontSize,
@@ -52,38 +57,33 @@ window.MonacoEnvironment = {
   }
 }
 
-// export const createEditor = ({ domElement, language, value }) => {
-//   return monaco.editor.create(domElement, {
-//     value,
-//     language,
-//     ...COMMON_EDITOR_OPTIONS
-//   })
-// }
-
 export async function createEditors (configs) {
-  await loadWASM('node_modules/onigasm/lib/onigasm.wasm') // See https://www.npmjs.com/package/onigasm#light-it-up
+  await loadWASM('node_modules/onigasm/lib/onigasm.wasm')
 
   const registry = new Registry({
     getGrammarDefinition: async (scopeName) => {
       const extension = scopeName.split('.')[1]
-      return {
-        format: 'json',
-        content: await (await window.fetch(`src/public/assets/syntaxes/${extension}.tmLanguage.json`)).text()
+      const fileNames = {
+        js: 'javascript',
+        ts: 'typescript'
       }
+      const data = {
+        format: 'json',
+        content: await (await window.fetch(`src/public/assets/syntaxes/${fileNames[extension] || extension}.tmLanguage.json`)).text()
+      }
+      return data
     }
   })
 
-  // map of monaco "language id's" to TextMate scopeNames
   const grammars = new Map()
   grammars.set('css', 'source.css')
   grammars.set('html', 'text.html.basic')
   grammars.set('typescript', 'source.ts')
   grammars.set('javascript', 'source.js')
 
-  // monaco's built-in themes aren't powereful enough to handle TM tokens
-  // https://github.com/Nishkalkashyap/monaco-vscode-textmate-theme-converter#monaco-vscode-textmate-theme-converter
   Object.entries(themes).forEach(([name, config]) => {
-    monaco.editor.defineTheme(name, config)
+    console.log(window.convertTheme(config))
+    monaco.editor.defineTheme(name, { ...window.convertTheme(config), inherit: true })
     const themeSelect = $('.select select[data-for="theme"]')
     const option = document.createElement('option')
     option.text = name
@@ -92,6 +92,7 @@ export async function createEditors (configs) {
   })
   const editors = {}
   await Promise.all(configs.map(async ({ language, value, domElement }) => {
+    console.log(COMMON_EDITOR_OPTIONS)
     const editor = monaco.editor.create(domElement, {
       value,
       language,

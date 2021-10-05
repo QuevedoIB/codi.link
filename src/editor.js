@@ -6,6 +6,10 @@ import JsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
 import { loadWASM } from 'onigasm'
 import { Registry } from 'monaco-textmate'
 import { wireTmGrammars } from 'monaco-editor-textmate'
+import { getReactTypes } from './services/reactService'
+import { parse } from '@babel/parser'
+import traverse from '@babel/traverse'
+import MonacoJSXHighlighter from 'monaco-jsx-highlighter'
 
 import { getState } from './state.js'
 import configureThemes from './utils/configureThemes.js'
@@ -50,7 +54,7 @@ emmetHTML(monaco)
 window.MonacoEnvironment = {
   getWorker (_, label) {
     if (label === 'html') return new HtmlWorker()
-    if (label === 'javascript') return new JsWorker()
+    if (label === 'javascript' || label === 'typescript') return new JsWorker()
     if (label === 'css') return new CssWorker()
   }
 }
@@ -90,8 +94,49 @@ export async function createEditors (configs) {
       ...COMMON_EDITOR_OPTIONS
     })
     editors[language] = editor
+    if (language === 'javascript') {
+      // Minimal Babel setup for React JSX parsing:
+      const babelParse = code => parse(code, {
+        sourceType: 'module',
+        plugins: ['jsx']
+      })
+
+      // Instantiate the highlighter
+      const monacoJSXHighlighter = new MonacoJSXHighlighter(
+        monaco, babelParse, traverse, editor
+      )
+      // Activate highlighting (debounceTime default: 100ms)
+      monacoJSXHighlighter.highLightOnDidChangeModelContent(100)
+      // Activate JSX commenting
+      monacoJSXHighlighter.addJSXCommentCommand()
+    }
     return await wireTmGrammars(monaco, registry, grammars, editor)
   }))
+
+  monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+    target: monaco.languages.typescript.ScriptTarget.Latest,
+    allowNonTsExtensions: true,
+    moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+    module: monaco.languages.typescript.ModuleKind.CommonJS,
+    noEmit: true,
+    esModuleInterop: true,
+    jsx: monaco.languages.typescript.JsxEmit.React,
+    reactNamespace: 'React',
+    allowJs: true,
+    typeRoots: ['node_modules/@types']
+  })
+
+  monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+    noSemanticValidation: false,
+    noSyntaxValidation: false
+  })
+
+  const types = await getReactTypes()
+
+  monaco.languages.typescript.typescriptDefaults.addExtraLib(
+    types,
+    'file:///node_modules/@react/types/index.d.ts'
+  )
 
   return editors
 }

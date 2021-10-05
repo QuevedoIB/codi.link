@@ -1,5 +1,8 @@
 import * as monaco from 'monaco-editor-core'
 import { $ } from './dom.js'
+import { Buffer } from 'buffer'
+
+window.Buffer = Buffer
 
 export const initEditorHotKeys = ({ htmlEditor, jsEditor, cssEditor }) => {
   const editors = [htmlEditor, jsEditor, cssEditor]

@@ -12,8 +12,12 @@ class WindowPreviewer {
   }
 
   setupWindowIframe () {
-    const title = `${document.title} | Preview`
-    this.previewerWindow.document.title = title
+    this.previewerWindow.document.title = `${document.title} | Preview`
+    const favicon = document.createElement('link')
+    favicon.type = 'image/x-icon'
+    favicon.rel = 'icon'
+    favicon.href = 'https://raw.githubusercontent.com/midudev/codi.link/main/assets/favicon.ico'
+    this.previewerWindow.document.head.appendChild(favicon)
     this.previewerWindow.document.body.style.margin = 0
     this.iframe = this.previewerWindow.document.createElement('iframe')
     Object.entries(this.iframeStyles).forEach(
